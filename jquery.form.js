@@ -284,7 +284,7 @@ $.fn.ajaxSubmit = function(options) {
                 var data, doc;
 
                 doc = io.contentWindow ? io.contentWindow.document : io.contentDocument ? io.contentDocument : io.document;
-				
+
 				var isXml = opts.dataType == 'xml' || doc.XMLDocument || $.isXMLDoc(doc);
 				log('isXml='+isXml);
                 if (!isXml && (doc.body == null || doc.body.innerHTML == '')) {
@@ -370,20 +370,24 @@ $.fn.ajaxForm = function(options) {
         return false;
     }).each(function() {
         // store options in hash
-        $(":submit,input:image", this).bind('click.form-plugin',function(e) {
-            var form = this.form;
-            form.clk = this;
-            if (this.type == 'image') {
+        $(this).bind('click.form-plugin',function(e) {
+        	var el = jQuery(e.target);
+        	if (!(el.is(":submit,input:image"))) {
+        		return;
+        	}
+            var form = this;
+            form.clk = e.target;
+            if (e.target.type == 'image') {
                 if (e.offsetX != undefined) {
                     form.clk_x = e.offsetX;
                     form.clk_y = e.offsetY;
                 } else if (typeof $.fn.offset == 'function') { // try to use dimensions plugin
-                    var offset = $(this).offset();
+                    var offset = el.offset();
                     form.clk_x = e.pageX - offset.left;
                     form.clk_y = e.pageY - offset.top;
                 } else {
-                    form.clk_x = e.pageX - this.offsetLeft;
-                    form.clk_y = e.pageY - this.offsetTop;
+                    form.clk_x = e.pageX - e.target.offsetLeft;
+                    form.clk_y = e.pageY - e.target.offsetTop;
                 }
             }
             // clear form vars
@@ -394,11 +398,7 @@ $.fn.ajaxForm = function(options) {
 
 // ajaxFormUnbind unbinds the event handlers that were bound by ajaxForm
 $.fn.ajaxFormUnbind = function() {
-    this.unbind('submit.form-plugin');
-    return this.each(function() {
-        $(":submit,input:image", this).unbind('click.form-plugin');
-    });
-
+	return this.unbind('submit.form-plugin').unbind('click.form-plugin');
 };
 
 /**
